@@ -1,0 +1,15 @@
+{
+  "meta": {
+    "title": "XERJ Search",
+    "description": "Unified AI-native code search, semantic retrieval, and background index management."
+  },
+  "panel": {
+    "title": "XERJ",
+    "cluster": "Cluster Health",
+    "project": "Current Project",
+    "reindex": "Re-index Project",
+    "indexing": "Indexing in progress...",
+    "metrics": "Usage & Performance",
+    "console": "Open XERJ Console"
+  }
+}

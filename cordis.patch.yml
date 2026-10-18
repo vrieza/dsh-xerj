@@ -1,0 +1,33 @@
+# dsh-xerj bundle patch: mounts XERJ search integration into DSH
+- insert:
+    - id: xerj
+      name: dsh-xerj
+      config:
+        binary: auto
+        url: http://127.0.0.1:9200
+        manageNode: true
+        managedPort: 9200
+        dataDir: ~/.dsh/xerj/data
+        insecure: true
+        stopOnDispose: true
+        keepFresh: true
+        keepFreshDebounceMs: 20000
+        ui:
+          toolCards: true
+          sidebarPanel: true
+          consoleTab: true
+    - id: mcp-xerj
+      name: '@deepseek-ai/dsh-mcp-client'
+      config:
+        serverName: xerj
+        transport: stdio
+        command: !!js "process.env.XERJ_BIN || 'xerj'"
+        args: [mcp]
+        env:
+          XERJ_URL: http://127.0.0.1:9200
+        toolCallTimeoutMs: 120000
+        failOnStartupError: false
+
+# Enable right-sidebar browser tab if consoleTab is active
+- id: ui-sidebar-browser
+  disabled: false

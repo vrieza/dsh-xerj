@@ -1,0 +1,15 @@
+{
+  "meta": {
+    "title": "XERJ 搜索",
+    "description": "面向 AI 的原生代码搜索、语义检索与全自动索引管理。"
+  },
+  "panel": {
+    "title": "XERJ",
+    "cluster": "集群状态",
+    "project": "当前项目",
+    "reindex": "重新建立索引",
+    "indexing": "正在建立索引...",
+    "metrics": "使用与性能指标",
+    "console": "打开 XERJ 控制台"
+  }
+}
