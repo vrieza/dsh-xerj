@@ -2,3 +2,5 @@ node_modules/
 *.log
 *.bak
 .DS_Store
+# rollback checkpoints written by the dsh-git-rollback plugin
+.dsh/

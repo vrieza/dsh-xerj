@@ -67,7 +67,18 @@ Mistakes made while building this plugin, so they do not repeat. Each entry: wha
 - **Why:** I generated files through template literals without escaping.
 - **Check:** Build such files with placeholders or arrays of lines, then run `node --check` / `bash -n` on the result.
 
+## 14. Fixed the first startup crash, user restarted, plugin still dead
+- **What:** After lesson 2-4 I told the user to restart. The plugin was still unreachable. Four more crashes were hiding behind the first ones: `ctx.logger` is a function, `ctx.skills` read without `inject`, a command `input` shaped `{ type }` instead of `{ hint }`, and `ctx.sessions` read on the route host (bare 400 on /status).
+- **Why:** My `apply()` test used a lenient mock, so every wrong assumption about dsh's API passed. I again told the user it worked without booting dsh.
+- **Check:** Boot a real second dsh (`dsh web --port 3199 --no-open`) and read its stdout. dsh prints startup errors only there. The unit test now throws on un-injected services like Cordis does, but the real boot is the proof.
+
+## 15. Gave the system prompt data it cannot have
+- **What:** The prompt section tried to read the session folder from its argument. dsh passes `{ scope, signal }`, so it silently used `process.cwd()` and put the wrong project prefix in every conversation.
+- **Why:** I guessed the callback signature instead of reading `AssembleContext`.
+- **Check:** Read the `.d.ts` of every dsh API before using it. The section is now generic.
+
 ## Debug order that works
+0. Boot a real second dsh on another port and read its log (AGENTS.md, step 2). This finds startup crashes in one go.
 1. Is the process new enough? (`ps -o lstart` vs. file mtimes)
 2. Does the route answer? (`curl .../dsh-xerj/status`: 404 / 401 / 200)
 3. Does `apply()` boot from `$HOME`? (`npm test`)

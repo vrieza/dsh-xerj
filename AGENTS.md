@@ -29,22 +29,32 @@ dsh --profile web --dump-config | grep -A8 "id: xerj"   # is it mounted?
 
 ## Before you say "it works" (do all of these)
 
-1. `npm test` passes. The `apply()` test (`test/apply.test.js`) boots the real startup code from `$HOME`. Mocked unit tests alone are not proof.
-2. `curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:3080/dsh-xerj/status`
-   - `404` = the plugin did NOT load. Find the startup error. Do not touch the UI yet.
-   - `401` = server is up but needs the login cookie; open the URL printed by `dsh web` in a browser.
-3. The running dsh process must have been started after your last edit: `ps -o lstart= -p $(lsof -t -iTCP:3080 -sTCP:LISTEN)`. Host code is not hot-reloaded. Tell the user to restart `dsh web` and hard-refresh.
+1. `npm test` passes. `test/apply.test.js` boots `apply()` from `$HOME` against a strict Cordis-like context (throws on services missing from `inject`) and calls a route handler. Mocks still miss things, so also do step 2.
+2. **Boot a real second dsh and read its output.** Startup errors are printed only there (not in `~/.dsh/logs`):
+   ```bash
+   (nohup dsh web --port 3199 --no-open > /tmp/dsh-probe.log 2>&1 & echo $! > /tmp/dsh-probe.pid); sleep 25
+   grep -iE "warning|did not activate|Error|xerj \(" /tmp/dsh-probe.log      # must print nothing
+   curl -s -w " [%{http_code}]" "http://127.0.0.1:3199/dsh-xerj/status?cwd=$PWD"   # must be 200
+   kill $(cat /tmp/dsh-probe.pid); pkill -f "dsh web --port 3199"
+   ```
+   "dsh: warning: 1 entry did not activate" means the plugin crashed in `apply()`; the next line is the error. A 404 on `/dsh-xerj/*` means the same.
+3. The user's dsh must be restarted after host-side edits (`ps -o lstart= -p $(lsof -t -iTCP:3080 -sTCP:LISTEN)`). Host code is not hot-reloaded. Client edits need a hard refresh.
 4. If you could not check the browser UI, say so. Never write "should work now".
 
 ## DSH facts (verified on dsh 0.2.0-rc.2)
 
 - Host plugin shape: `export name, inject, apply(ctx, config)` and `export { Config }`.
 - `@deepseek-ai/*` packages resolve only inside dsh. The plugin is symlinked into the profile (`link:`), so Node resolves from the repo path and finds nothing. That is why `setup:links` exists. Do not add these as dependencies.
+- `ctx.logger` is a callable service: `ctx.logger('xerj')`, not an object.
+- Services missing from `inject` throw when read (`cannot get property "skills" without inject`). Read optional ones with `ctx.get('skills')`, `ctx.get('commands')`, `ctx.get('sessions')`. The `webServer` route host (`ctx.inject(['webServer'], host => ...)`) has no `sessions` either: use `host.get('sessions')`.
+- `commands.register({ name, description, input: { hint: 'string' }, handler })`: `input` must be `{ hint }`, not `{ type }`. Handler gets `invocation.rawInput` and `invocation.agent`.
+- `systemPrompt.section({ name, order, text })`: `text` is called with `{ scope, signal }`, **no agent**, so it cannot know the session folder. Keep it generic and let `xerj_status` report the prefix.
+- A route handler that throws gives a bare `400` with an empty body (dsh-host-webserver). If a route returns 400 and no JSON, call the handler directly in node to see the exception.
 - `defineTool` output schema must be `{ type: 'json' }` or an object with an explicit `additionalProperties`. `{ type: 'object' }` alone throws and kills the whole plugin at boot.
 - Session folder, per context:
   - tools: `exec.agent.session.header.cwd`
   - commands: `invocation.agent.session.header.cwd` (input text is `invocation.rawInput`)
-  - routes: `ctx.sessions.get(sessionId).header.cwd`
+  - routes: `host.get('sessions')?.get(sessionId).header.cwd` (the route host has no `sessions` property)
   - panel: `props.scope.repoRoot || props.scope.cwd` (better-sidebar)
   - Never use `process.cwd()`. dsh is usually started from `$HOME`.
 - Sidebar: with dsh-better-sidebar use `ctx.betterSidebar.registerTab({id,title,order,single,icon,component})`. Native sidebar needs two steps: `sidebarRightTabs.register` (the type) and the `sidebar.right.pane.tab` slot (the body).
