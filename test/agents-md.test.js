@@ -183,3 +183,15 @@ test('updateAgentsMd leaves other "## XERJ ..." sections untouched', () => {
   assert.ok(!updated.includes('old text'));
   assert.ok(updated.includes('## Rules'));
 });
+
+test('updateAgentsMd is idempotent on CRLF files and keeps CRLF endings', () => {
+  const crlf = '# P\r\n\r\n## XERJ (code search)\r\n\r\nold text\r\n\r\n## Rules\r\n- r\r\n';
+  const once = updateAgentsMd(crlf, 'dsh-x-1');
+  const twice = updateAgentsMd(once, 'dsh-x-1');
+
+  assert.equal((once.match(/## XERJ/g) || []).length, 1);
+  assert.equal(twice, once, 'second run must not change the file');
+  assert.ok(!once.includes('old text'));
+  assert.ok(once.includes('## Rules\r\n- r\r\n'), 'following section survives');
+  assert.ok(!/[^\r]\n/.test(once), 'no bare LF in a CRLF file');
+});
