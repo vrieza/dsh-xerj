@@ -44,7 +44,7 @@ test('apply() boots from $HOME, registers tools and routes', async () => {
     });
     apply(ctx, { manageNode: false, url: 'http://127.0.0.1:9' });
 
-    assert.deepEqual(tools.sort(), ['xerj_autoindex', 'xerj_def', 'xerj_status']);
+    assert.deepEqual(tools.sort(), ['xerj_autoindex', 'xerj_def', 'xerj_search', 'xerj_status']);
     for (const path of ['/dsh-xerj/config', '/dsh-xerj/status', '/dsh-xerj/index', '/dsh-xerj/setup', '/dsh-xerj/node']) {
       assert.ok(routes.includes(path), 'missing route ' + path);
     }

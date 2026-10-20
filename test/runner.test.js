@@ -21,6 +21,8 @@ test('IndexRunner executes autoindex and tracks progress', async () => {
 
   assert.equal(run.prefix, prefix);
   assert.equal(run.status, 'running');
+  assert.equal(runner.getActiveRun(prefix), run);
+  assert.equal(runner.getLastRun(prefix), null);
 
   // Wait for run completion
   await new Promise(r => runner.once('done', r));
@@ -29,6 +31,9 @@ test('IndexRunner executes autoindex and tracks progress', async () => {
   assert.equal(run.exitCode, 0);
   assert.equal(run.summary.records, 150);
   assert.equal(run.summary.datasets, 2);
+
+  assert.equal(runner.getActiveRun(prefix), null, 'finished run must not be reported as activeRun');
+  assert.equal(runner.getLastRun(prefix), run, 'finished run must be under lastRun');
 
   const last = runner.getLastSummary(prefix);
   assert.equal(last.records, 150);

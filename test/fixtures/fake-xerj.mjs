@@ -48,5 +48,16 @@ if (args[0] === 'def') {
   process.exit(0);
 }
 
+if (args[0] === 'search') {
+  const prefixIdx = args.indexOf('--prefix');
+  const prefix = prefixIdx !== -1 ? args[prefixIdx + 1] : null;
+  console.log(JSON.stringify({
+    prefix,
+    cliArgs: args,
+    hits: { total: { value: 1 }, hits: [{ _id: 'test-1', _source: { title: 'test match' } }] }
+  }));
+  process.exit(0);
+}
+
 console.log('xerj mock');
 process.exit(0);
