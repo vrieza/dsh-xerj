@@ -14,7 +14,7 @@ Read [docs/LESSONS.md](docs/LESSONS.md) before changing anything: the plugin shi
 | `lib/node.js` | `NodeManager`: adopt or spawn the XERJ engine, pid/log files, `snapshot()` |
 | `lib/runner.js`, `lib/autoindex.js`, `lib/cli.js` | Index runs: spawn `xerj autoindex`, parse `xerj-progress`/`xerj-done`, exit codes |
 | `lib/routes.js` | HTTP routes under `/dsh-xerj/*` (config, status, node, index, cancel, setup, gain) |
-| `lib/tools.js`, `lib/commands.js`, `lib/prompt.js` | Tools `xerj_status`/`xerj_autoindex`/`xerj_def`, `/xerj` command, system prompt and skill text |
+| `lib/tools.js`, `lib/commands.js`, `lib/prompt.js` | Tools `xerj_status`/`xerj_autoindex`/`xerj_def`/`xerj_search`, `/xerj` command, system prompt and skill text |
 | `client/client.js` | Browser bundle. **Hand-written, no build step.** Panel, tool cards, settings form |
 | `cordis.patch.yml` | Mounts `xerj` (this plugin) and `mcp-xerj` (the official `xerj mcp` server) |
 | `scripts/link-dsh-deps.sh` | Creates machine-local links so plain Node can import dsh-only packages |
@@ -88,3 +88,10 @@ dsh --profile web --dump-config | grep -A8 "id: xerj"   # is it mounted?
 - Whether the tool cards receive an `openFile` prop in the chat is unverified; the click handler is a no-op without it.
 - The sidebar panel and settings form were verified through the host API and a syntax check only. Nobody has seen them render in the browser yet.
 - `locale/*.json` is not read by `client/client.js` (it has its own inline strings).
+
+## XERJ (code search)
+
+This project uses XERJ for reference coding. Before writing code that touches
+unfamiliar territory: `xerj def "<symbol>"` for go-to-definition, or
+`xerj search "<plain words>"` for ranked, definition-first passages.
+Index a repo with `xerj autoindex <folder>`. Cite file:line for anything you rely on.

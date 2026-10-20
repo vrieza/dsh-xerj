@@ -226,6 +226,11 @@ window.__ModuleLoader__.load({
         if (!r.error) setMessage({ kind: 'ok', text: 'Wrote ' + (r.wrote || []).join(', ') });
         return r;
       });
+      const updateAgentsMdAction = () => act('agents-md', async () => {
+        const r = await api('/dsh-xerj/setup', { ...targetBody(), action: 'agents-md' });
+        if (!r.error) setMessage({ kind: 'ok', text: 'Updated ' + (r.wrote || []).join(', ') });
+        return r;
+      });
       const runInit = (dryRun) => act(dryRun ? 'preview' : 'init', async () => {
         const r = await api('/dsh-xerj/setup', { ...targetBody(), action: 'init', dryRun });
         setInitOutput(r.output || r.error || '');
@@ -254,7 +259,7 @@ window.__ModuleLoader__.load({
       const ws = status.workspace || {};
       const node = status.node || {};
       const [nodeText, nodeColor] = NODE_LABEL[status.nodeStatus] || [status.nodeStatus, '#94a3b8'];
-      const run = status.activeRun;
+      const run = status.activeRun || status.lastRun;
       const setup = status.setup || {};
       const others = (status.workspaces || []).filter((w) => w.root !== ws.root);
 
@@ -351,6 +356,7 @@ window.__ModuleLoader__.load({
           h(Check, { on: setup.agentsMd, label: "AGENTS.md mentions XERJ" }),
           h("div", { style: { display: "flex", gap: 6, marginTop: 8, flexWrap: "wrap" } },
             h("button", { style: btnStyle, disabled: busy === 'skill' || !ws.exists, onClick: installSkill }, setup.dshSkill ? "Reinstall skill" : "Install skill"),
+            h("button", { style: btnStyle, disabled: busy === 'agents-md' || !ws.exists, onClick: updateAgentsMdAction }, "Update AGENTS.md"),
             h("button", { style: btnStyle, disabled: !node.binary || busy === 'preview' || !ws.exists, onClick: () => runInit(true) }, "Preview xerj init"),
             h("button", { style: btnStyle, disabled: !node.binary || busy === 'init' || !ws.exists, onClick: () => {
               if (window.confirm('Run "xerj init" in ' + ws.root + '?\nIt writes .mcp.json, .claude/skills/xerj and AGENTS.md (with .bak backups).')) runInit(false);
