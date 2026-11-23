@@ -1,5 +1,7 @@
 # dsh-xerj
 
+> **End of support (2026-11-23).** This plugin is no longer maintained and the repository is archived. It is kept for reference only.
+
 > Seamless [XERJ](https://github.com/xerj-org/xerj) search engine integration for DeepSeek Harness (DSH).
 
 `dsh-xerj` turns any project workspace into an instantly searchable, semantically queryable codebase with zero manual configuration. It bundles XERJ's official Model Context Protocol (MCP) server, a host-managed background index runner, and intuitive visual controls for the DSH Web UI.
